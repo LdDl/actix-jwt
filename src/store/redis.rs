@@ -180,8 +180,8 @@ impl TokenStore for RedisRefreshTokenStore {
     ///
     /// # Errors
     ///
-    /// * [`JwtError::TokenEmpty`] — empty token string.
-    /// * [`JwtError::ExpiryInPast`] — computed TTL < 1 second.
+    /// * [`JwtError::TokenEmpty`] - empty token string.
+    /// * [`JwtError::ExpiryInPast`] - computed TTL < 1 second.
     async fn set(
         &self,
         token: &str,
@@ -221,8 +221,8 @@ impl TokenStore for RedisRefreshTokenStore {
     ///
     /// # Errors
     ///
-    /// * [`JwtError::TokenEmpty`] — empty token string.
-    /// * [`JwtError::RefreshTokenNotFound`] — key does not exist or is
+    /// * [`JwtError::TokenEmpty`] - empty token string.
+    /// * [`JwtError::RefreshTokenNotFound`] - key does not exist or is
     ///   expired.
     async fn get(&self, token: &str) -> Result<serde_json::Value, JwtError> {
         if token.is_empty() {
@@ -299,11 +299,9 @@ impl TokenStore for RedisRefreshTokenStore {
                 if let Some(serialized) = value {
                     if let Ok(data) = serde_json::from_str::<RefreshTokenData>(&serialized) {
                         if data.is_expired() {
-                            conn.del::<_, ()>(key)
-                                .await
-                                .map_err(|e| {
-                                    JwtError::Internal(format!("Redis DEL failed: {}", e))
-                                })?;
+                            conn.del::<_, ()>(key).await.map_err(|e| {
+                                JwtError::Internal(format!("Redis DEL failed: {}", e))
+                            })?;
                             removed += 1;
                         }
                     }

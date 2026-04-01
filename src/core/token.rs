@@ -153,7 +153,10 @@ mod tests {
             expiry: Utc::now() + Duration::hours(1),
             created: Utc::now(),
         };
-        assert!(!valid.is_expired(), "Token with future expiry should not be expired");
+        assert!(
+            !valid.is_expired(),
+            "Token with future expiry should not be expired"
+        );
 
         // Expired token
         let expired = RefreshTokenData {
@@ -161,6 +164,9 @@ mod tests {
             expiry: Utc::now() - Duration::hours(1),
             created: Utc::now() - Duration::hours(2),
         };
-        assert!(expired.is_expired(), "Token with past expiry should be expired");
+        assert!(
+            expired.is_expired(),
+            "Token with past expiry should be expired"
+        );
     }
 }

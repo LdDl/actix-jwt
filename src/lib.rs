@@ -3,7 +3,7 @@
 //! This crate is a Rust port of the Go
 //! [`echo-jwt`](https://github.com/LdDl/echo-jwt) module (itself a port of
 //! [`gin-jwt`](https://github.com/appleboy/gin-jwt) to the Echo framework).
-//! It goes far beyond simple token validation — it provides login, logout and
+//! It goes far beyond simple token validation - it provides login, logout and
 //! refresh handlers, refresh-token rotation with a pluggable store, cookie
 //! management, RSA / HMAC signing, RBAC authorizer callback and more.
 //!
@@ -74,7 +74,7 @@ pub mod store;
 pub use core::{RefreshTokenData, Token, TokenStore};
 pub use errors::JwtError;
 pub use middleware::{
-    extract_claims, get_identity, get_token, ActixJwtMiddleware, CookieConfig, JwtAuth,
-    JwtIdentity, JwtPayload, JwtTokenString,
+    ActixJwtMiddleware, CookieConfig, JwtAuth, JwtIdentity, JwtPayload, JwtTokenString,
+    extract_claims, get_identity, get_token,
 };
 pub use store::{InMemoryRefreshTokenStore, default_store, new_memory_store};

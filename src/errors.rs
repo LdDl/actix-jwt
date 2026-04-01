@@ -8,8 +8,8 @@
 
 use std::fmt;
 
-use actix_web::http::StatusCode;
 use actix_web::HttpResponse;
+use actix_web::http::StatusCode;
 
 /// Unified error type for the JWT middleware.
 ///

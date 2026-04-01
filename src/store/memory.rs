@@ -148,8 +148,8 @@ impl TokenStore for InMemoryRefreshTokenStore {
     ///
     /// # Errors
     ///
-    /// * [`JwtError::TokenEmpty`] — empty token string.
-    /// * [`JwtError::RefreshTokenNotFound`] — token absent or expired.
+    /// * [`JwtError::TokenEmpty`] - empty token string.
+    /// * [`JwtError::RefreshTokenNotFound`] - token absent or expired.
     async fn get(&self, token: &str) -> Result<serde_json::Value, JwtError> {
         if token.is_empty() {
             return Err(JwtError::TokenEmpty);
@@ -212,7 +212,8 @@ mod tests {
     #[tokio::test]
     async fn test_set() {
         let store = InMemoryRefreshTokenStore::new();
-        let user_data = serde_json::json!({"id": "123", "username": "testuser", "email": "test@example.com"});
+        let user_data =
+            serde_json::json!({"id": "123", "username": "testuser", "email": "test@example.com"});
         let expiry = Utc::now() + Duration::hours(1);
 
         store.set("token123", user_data, expiry).await.unwrap();
@@ -224,10 +225,14 @@ mod tests {
     #[tokio::test]
     async fn test_get() {
         let store = InMemoryRefreshTokenStore::new();
-        let user_data = serde_json::json!({"id": "123", "username": "testuser", "email": "test@example.com"});
+        let user_data =
+            serde_json::json!({"id": "123", "username": "testuser", "email": "test@example.com"});
         let expiry = Utc::now() + Duration::hours(1);
 
-        store.set("token123", user_data.clone(), expiry).await.unwrap();
+        store
+            .set("token123", user_data.clone(), expiry)
+            .await
+            .unwrap();
 
         let result = store.get("token123").await.unwrap();
         assert_eq!(result["id"], "123");
@@ -438,7 +443,10 @@ mod tests {
 
         // count() returns total (including expired)
         let count = store.count().await.unwrap();
-        assert_eq!(count, 5, "Count should include both valid and expired tokens");
+        assert_eq!(
+            count, 5,
+            "Count should include both valid and expired tokens"
+        );
 
         // After cleanup, only valid tokens remain
         let cleaned = store.cleanup().await.unwrap();
@@ -501,7 +509,10 @@ mod tests {
         }
 
         let count = store.count().await.unwrap();
-        assert_eq!(count, 0, "All tokens should be deleted after concurrent deletes");
+        assert_eq!(
+            count, 0,
+            "All tokens should be deleted after concurrent deletes"
+        );
     }
 
     #[tokio::test]
@@ -512,7 +523,10 @@ mod tests {
             expiry: Utc::now() + Duration::hours(1),
             created: Utc::now(),
         };
-        assert!(!data.is_expired(), "Token with future expiry should not be expired");
+        assert!(
+            !data.is_expired(),
+            "Token with future expiry should not be expired"
+        );
 
         // Expired token
         let data = RefreshTokenData {
@@ -520,6 +534,9 @@ mod tests {
             expiry: Utc::now() - Duration::hours(1),
             created: Utc::now() - Duration::hours(2),
         };
-        assert!(data.is_expired(), "Token with past expiry should be expired");
+        assert!(
+            data.is_expired(),
+            "Token with past expiry should be expired"
+        );
     }
 }

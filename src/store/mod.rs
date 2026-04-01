@@ -22,13 +22,13 @@
 //! let another = new_memory_store();
 //! ```
 
-pub mod memory;
 pub mod factory;
+pub mod memory;
 #[cfg(feature = "redis-store")]
 pub mod redis;
 
-pub use memory::*;
 pub use factory::*;
+pub use memory::*;
 #[cfg(feature = "redis-store")]
 pub use redis::*;
 

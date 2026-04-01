@@ -81,7 +81,7 @@ impl Factory {
     ///
     /// # Errors
     ///
-    /// * [`JwtError::Internal`] — when `StoreType::Redis` is requested but
+    /// * [`JwtError::Internal`] - when `StoreType::Redis` is requested but
     ///   the `redis-store` feature is not enabled, or when the Redis
     ///   connection fails.
     pub async fn create_store(
@@ -93,12 +93,8 @@ impl Factory {
             StoreType::Redis => {
                 #[cfg(feature = "redis-store")]
                 {
-                    let redis_config = config
-                        .redis
-                        .clone()
-                        .unwrap_or_default();
-                    let store =
-                        super::redis::RedisRefreshTokenStore::new(&redis_config).await?;
+                    let redis_config = config.redis.clone().unwrap_or_default();
+                    let store = super::redis::RedisRefreshTokenStore::new(&redis_config).await?;
                     Ok(Box::new(store))
                 }
                 #[cfg(not(feature = "redis-store"))]
@@ -185,7 +181,10 @@ mod tests {
         };
 
         let store = factory.create_store(&config).await;
-        assert!(store.is_ok(), "Factory should create memory store successfully");
+        assert!(
+            store.is_ok(),
+            "Factory should create memory store successfully"
+        );
 
         // Verify the store works
         let store = store.unwrap();
@@ -198,10 +197,17 @@ mod tests {
         let factory = Factory::new();
         let config = StoreConfig::default();
 
-        assert_eq!(config.store_type, StoreType::Memory, "Default config should use Memory type");
+        assert_eq!(
+            config.store_type,
+            StoreType::Memory,
+            "Default config should use Memory type"
+        );
 
         let store = factory.create_store(&config).await;
-        assert!(store.is_ok(), "Factory should create store from default config");
+        assert!(
+            store.is_ok(),
+            "Factory should create store from default config"
+        );
     }
 
     #[tokio::test]
@@ -213,7 +219,10 @@ mod tests {
         };
 
         let store = new_store(&config).await;
-        assert!(store.is_ok(), "new_store() should create memory store successfully");
+        assert!(
+            store.is_ok(),
+            "new_store() should create memory store successfully"
+        );
 
         let store = store.unwrap();
         let count = store.count().await.unwrap();
@@ -238,7 +247,10 @@ mod tests {
     async fn test_must_new_memory_store() {
         let store = must_new_memory_store();
         let count = store.count().await.unwrap();
-        assert_eq!(count, 0, "must_new_memory_store() should return an empty store");
+        assert_eq!(
+            count, 0,
+            "must_new_memory_store() should return an empty store"
+        );
     }
 
     #[cfg(not(feature = "redis-store"))]
@@ -250,7 +262,10 @@ mod tests {
         };
 
         let result = factory.create_store(&config).await;
-        assert!(result.is_err(), "Creating Redis store without feature should fail");
+        assert!(
+            result.is_err(),
+            "Creating Redis store without feature should fail"
+        );
 
         let err_msg = match result {
             Err(e) => e.to_string(),

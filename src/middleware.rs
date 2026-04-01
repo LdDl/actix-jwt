@@ -122,47 +122,38 @@ pub struct ActixJwtMiddleware {
     pub key: Vec<u8>,
     /// Optional callback for multi-key (KID) support. When set, `key` and
     /// RSA key fields are ignored for **decoding**.
-    pub key_func: Option<
-        Arc<dyn Fn(&jsonwebtoken::Header) -> Result<DecodingKey, JwtError> + Send + Sync>,
-    >,
+    pub key_func:
+        Option<Arc<dyn Fn(&jsonwebtoken::Header) -> Result<DecodingKey, JwtError> + Send + Sync>>,
 
     /// Access token lifetime (default: 1 hour).
     pub timeout: Duration,
     /// Optional per-user timeout override based on the identity payload.
-    pub timeout_func:
-        Option<Arc<dyn Fn(&Value) -> Duration + Send + Sync>>,
+    pub timeout_func: Option<Arc<dyn Fn(&Value) -> Duration + Send + Sync>>,
     /// Maximum duration for which a token can be refreshed (0 = disabled).
     pub max_refresh: Duration,
     /// Clock function (override for testing).
     pub time_func: Arc<dyn Fn() -> DateTime<Utc> + Send + Sync>,
 
     /// Validates login credentials and returns user data on success.
-    pub authenticator: Option<
-        Arc<dyn Fn(&HttpRequest, &[u8]) -> Result<Value, JwtError> + Send + Sync>,
-    >,
+    pub authenticator:
+        Option<Arc<dyn Fn(&HttpRequest, &[u8]) -> Result<Value, JwtError> + Send + Sync>>,
     /// Decides whether the authenticated identity is allowed to proceed.
     pub authorizer: Arc<dyn Fn(&HttpRequest, &Value) -> bool + Send + Sync>,
     /// Maps user data to custom JWT claims.
-    pub payload_func:
-        Option<Arc<dyn Fn(&Value) -> HashMap<String, Value> + Send + Sync>>,
+    pub payload_func: Option<Arc<dyn Fn(&Value) -> HashMap<String, Value> + Send + Sync>>,
     /// Extracts the identity value from request extensions.
-    pub identity_handler:
-        Arc<dyn Fn(&HttpRequest) -> Option<Value> + Send + Sync>,
+    pub identity_handler: Arc<dyn Fn(&HttpRequest) -> Option<Value> + Send + Sync>,
 
     /// Builds the "unauthorized" HTTP response.
-    pub unauthorized:
-        Arc<dyn Fn(&HttpRequest, u16, &str) -> HttpResponse + Send + Sync>,
+    pub unauthorized: Arc<dyn Fn(&HttpRequest, u16, &str) -> HttpResponse + Send + Sync>,
     /// Builds the login success response.
-    pub login_response:
-        Arc<dyn Fn(&HttpRequest, &Token) -> HttpResponse + Send + Sync>,
+    pub login_response: Arc<dyn Fn(&HttpRequest, &Token) -> HttpResponse + Send + Sync>,
     /// Builds the logout success response.
     pub logout_response: Arc<dyn Fn(&HttpRequest) -> HttpResponse + Send + Sync>,
     /// Builds the refresh success response.
-    pub refresh_response:
-        Arc<dyn Fn(&HttpRequest, &Token) -> HttpResponse + Send + Sync>,
+    pub refresh_response: Arc<dyn Fn(&HttpRequest, &Token) -> HttpResponse + Send + Sync>,
     /// Maps a [`JwtError`] to a human-readable message for the response body.
-    pub http_status_message_func:
-        Arc<dyn Fn(&HttpRequest, &JwtError) -> String + Send + Sync>,
+    pub http_status_message_func: Arc<dyn Fn(&HttpRequest, &JwtError) -> String + Send + Sync>,
 
     /// Comma-separated list of `"source:name"` pairs (e.g.
     /// `"header:Authorization,query:token"`).
@@ -214,14 +205,11 @@ pub struct ActixJwtMiddleware {
 
     /// When this returns `true` for a request the middleware is bypassed
     /// entirely (labstack feature).
-    pub skipper:
-        Option<Arc<dyn Fn(&ServiceRequest) -> bool + Send + Sync>>,
+    pub skipper: Option<Arc<dyn Fn(&ServiceRequest) -> bool + Send + Sync>>,
     /// Called before token extraction (labstack feature).
-    pub before_func:
-        Option<Arc<dyn Fn(&ServiceRequest) + Send + Sync>>,
+    pub before_func: Option<Arc<dyn Fn(&ServiceRequest) + Send + Sync>>,
     /// Called after successful token validation (labstack feature).
-    pub success_handler:
-        Option<Arc<dyn Fn(&HttpRequest) -> Result<(), JwtError> + Send + Sync>>,
+    pub success_handler: Option<Arc<dyn Fn(&HttpRequest) -> Result<(), JwtError> + Send + Sync>>,
     /// Intercepts errors; returning `None` suppresses the error (labstack
     /// feature).
     pub error_handler:
@@ -231,7 +219,6 @@ pub struct ActixJwtMiddleware {
     /// public+auth routes).
     pub continue_on_ignored_error: bool,
 }
-
 
 impl ActixJwtMiddleware {
     /// Creates a new middleware instance with sensible defaults.
@@ -400,10 +387,7 @@ impl ActixJwtMiddleware {
 
     /// Returns `true` when the signing algorithm is RSA-based.
     pub fn using_public_key_algo(&self) -> bool {
-        matches!(
-            self.signing_algorithm.as_str(),
-            "RS256" | "RS384" | "RS512"
-        )
+        matches!(self.signing_algorithm.as_str(), "RS256" | "RS384" | "RS512")
     }
 
     /// Parse the `signing_algorithm` string into a `jsonwebtoken::Algorithm`.
@@ -439,12 +423,9 @@ impl ActixJwtMiddleware {
 
         if let Some(ref passphrase) = self.private_key_passphrase {
             // Encrypted PKCS#8 private key
-            let pem_str = std::str::from_utf8(&key_data)
+            let pem_str = std::str::from_utf8(&key_data).map_err(|_| JwtError::InvalidPrivKey)?;
+            let doc = pkcs8::EncryptedPrivateKeyInfo::try_from(pem_str.as_bytes())
                 .map_err(|_| JwtError::InvalidPrivKey)?;
-            let doc = pkcs8::EncryptedPrivateKeyInfo::try_from(
-                pem_str.as_bytes(),
-            )
-            .map_err(|_| JwtError::InvalidPrivKey)?;
 
             let decrypted = doc
                 .decrypt(passphrase.as_bytes())
@@ -455,14 +436,11 @@ impl ActixJwtMiddleware {
             // Re-encode as PEM for jsonwebtoken
             let pem = pem::encode(&pem::Pem::new("PRIVATE KEY", der_bytes.to_vec()));
             self.encoding_key = Some(
-                EncodingKey::from_rsa_pem(pem.as_bytes())
-                    .map_err(|_| JwtError::InvalidPrivKey)?,
+                EncodingKey::from_rsa_pem(pem.as_bytes()).map_err(|_| JwtError::InvalidPrivKey)?,
             );
         } else {
-            self.encoding_key = Some(
-                EncodingKey::from_rsa_pem(&key_data)
-                    .map_err(|_| JwtError::InvalidPrivKey)?,
-            );
+            self.encoding_key =
+                Some(EncodingKey::from_rsa_pem(&key_data).map_err(|_| JwtError::InvalidPrivKey)?);
         }
 
         Ok(())
@@ -480,19 +458,14 @@ impl ActixJwtMiddleware {
             return Err(JwtError::NoPubKeyFile);
         };
 
-        self.decoding_key = Some(
-            DecodingKey::from_rsa_pem(&key_data)
-                .map_err(|_| JwtError::InvalidPubKey)?,
-        );
+        self.decoding_key =
+            Some(DecodingKey::from_rsa_pem(&key_data).map_err(|_| JwtError::InvalidPubKey)?);
 
         Ok(())
     }
 
     /// Generate a signed JWT access token. Returns `(token_string, expiry)`.
-    pub fn generate_access_token(
-        &self,
-        data: &Value,
-    ) -> Result<(String, DateTime<Utc>), JwtError> {
+    pub fn generate_access_token(&self, data: &Value) -> Result<(String, DateTime<Utc>), JwtError> {
         let alg = self.algorithm()?;
 
         let mut claims = serde_json::Map::new();
@@ -514,11 +487,18 @@ impl ActixJwtMiddleware {
             .as_ref()
             .map(|f| f(data))
             .unwrap_or(self.timeout);
-        let expire = now + chrono::Duration::from_std(timeout)
-            .unwrap_or_else(|_| chrono::Duration::seconds(3600));
+        let expire = now
+            + chrono::Duration::from_std(timeout)
+                .unwrap_or_else(|_| chrono::Duration::seconds(3600));
 
-        claims.insert(self.exp_field.clone(), Value::Number(expire.timestamp().into()));
-        claims.insert("orig_iat".to_string(), Value::Number(now.timestamp().into()));
+        claims.insert(
+            self.exp_field.clone(),
+            Value::Number(expire.timestamp().into()),
+        );
+        claims.insert(
+            "orig_iat".to_string(),
+            Value::Number(now.timestamp().into()),
+        );
 
         let header = Header::new(alg);
         let claims_value = Value::Object(claims);
@@ -545,11 +525,7 @@ impl ActixJwtMiddleware {
     }
 
     /// Store a refresh token with associated user data.
-    async fn store_refresh_token(
-        &self,
-        token: &str,
-        user_data: &Value,
-    ) -> Result<(), JwtError> {
+    async fn store_refresh_token(&self, token: &str, user_data: &Value) -> Result<(), JwtError> {
         let expiry = (self.time_func)()
             + chrono::Duration::from_std(self.refresh_token_timeout)
                 .unwrap_or_else(|_| chrono::Duration::days(30));
@@ -576,10 +552,7 @@ impl ActixJwtMiddleware {
 
     /// Generate a complete token pair (access + refresh) and store the refresh
     /// token. Mirrors Go's `TokenGenerator`.
-    pub async fn token_generator(
-        &self,
-        data: &Value,
-    ) -> Result<Token, JwtError> {
+    pub async fn token_generator(&self, data: &Value) -> Result<Token, JwtError> {
         let (access_token, expire) = self.generate_access_token(data)?;
         let refresh_token = self.generate_refresh_token()?;
 
@@ -628,10 +601,7 @@ impl ActixJwtMiddleware {
     }
 
     /// Parse a raw JWT string and return its decoded data.
-    pub fn parse_token_string(
-        &self,
-        token: &str,
-    ) -> Result<TokenData<Value>, JwtError> {
+    pub fn parse_token_string(&self, token: &str) -> Result<TokenData<Value>, JwtError> {
         let alg = self.algorithm()?;
 
         if let Some(ref kf) = self.key_func {
@@ -641,6 +611,7 @@ impl ActixJwtMiddleware {
             let dk = kf(&header)?;
             let mut validation = Validation::new(alg);
             validation.validate_exp = true;
+            validation.validate_aud = false;
             validation.required_spec_claims.clear();
             return jsonwebtoken::decode::<Value>(token, &dk, &validation)
                 .map_err(|e| JwtError::TokenParsing(e.to_string()));
@@ -653,6 +624,7 @@ impl ActixJwtMiddleware {
 
         let mut validation = Validation::new(alg);
         validation.validate_exp = true;
+        validation.validate_aud = false;
         validation.required_spec_claims.clear();
 
         jsonwebtoken::decode::<Value>(token, decoding_key, &validation)
@@ -751,19 +723,12 @@ impl ActixJwtMiddleware {
     }
 
     /// Get JWT claims from the request by parsing the token.
-    fn get_claims_from_jwt(
-        &self,
-        req: &HttpRequest,
-    ) -> Result<HashMap<String, Value>, JwtError> {
+    fn get_claims_from_jwt(&self, req: &HttpRequest) -> Result<HashMap<String, Value>, JwtError> {
         let token_data = self.parse_token_from_request(req)?;
 
-        if self.send_authorization {
-            if let Some(JwtTokenString(ts)) = req.extensions().get::<JwtTokenString>() {
-                // The response header will be set later by the handler/middleware
-                // We store a flag so the middleware layer can act on it.
-                req.extensions_mut().insert(JwtTokenString(ts.clone()));
-            }
-        }
+        // Token string is already stored in extensions by
+        // parse_token_from_request; nothing extra needed for
+        // send_authorization here - the middleware layer reads it later.
 
         let claims_map = match token_data.claims {
             Value::Object(map) => map.into_iter().collect(),
@@ -802,18 +767,11 @@ impl ActixJwtMiddleware {
     }
 
     /// Build a default "unauthorized" `HttpResponse` with `WWW-Authenticate` header.
-    fn unauthorized_response(
-        &self,
-        req: &HttpRequest,
-        code: u16,
-        message: &str,
-    ) -> HttpResponse {
+    fn unauthorized_response(&self, req: &HttpRequest, code: u16, message: &str) -> HttpResponse {
         let mut resp = (self.unauthorized)(req, code, message);
         resp.headers_mut().insert(
             header::WWW_AUTHENTICATE,
-            format!("Bearer realm=\"{}\"", self.realm)
-                .parse()
-                .unwrap(),
+            format!("Bearer realm=\"{}\"", self.realm).parse().unwrap(),
         );
         resp
     }
@@ -825,9 +783,7 @@ impl ActixJwtMiddleware {
                 let msg = (self.http_status_message_func)(req, &JwtError::Forbidden);
                 self.unauthorized_response(req, 403, &msg)
             }
-            JwtError::TokenParsing(inner) => {
-                self.handle_token_error(req, inner)
-            }
+            JwtError::TokenParsing(inner) => self.handle_token_error(req, inner),
             JwtError::TokenExtraction(inner) => {
                 let msg = inner.clone();
                 self.unauthorized_response(req, 400, &msg)
@@ -893,11 +849,58 @@ impl ActixJwtMiddleware {
         CookieConfig {
             name: self.refresh_token_cookie_name.clone(),
             max_age: self.refresh_token_timeout,
-            secure: true,     // always secure for refresh tokens
-            http_only: true,  // always httpOnly for security
+            secure: true,    // always secure for refresh tokens
+            http_only: true, // always httpOnly for security
             domain: self.cookie_domain.clone(),
             same_site: self.cookie_same_site,
         }
+    }
+
+    /// Append a Set-Cookie header directly to an already-built response's
+    /// `HeaderMap`.  Used when the response is created by a callback
+    /// (`login_response`, `refresh_response`) and cookies must be added
+    /// afterwards.
+    fn append_cookie(
+        headers: &mut actix_web::http::header::HeaderMap,
+        config: &CookieConfig,
+        value: &str,
+    ) {
+        let mut cookie = Cookie::build(config.name.clone(), value.to_string())
+            .path("/")
+            .max_age(actix_web::cookie::time::Duration::seconds(
+                config.max_age.as_secs() as i64,
+            ))
+            .secure(config.secure)
+            .http_only(config.http_only)
+            .same_site(config.same_site)
+            .finish();
+
+        if let Some(ref domain) = config.domain {
+            cookie.set_domain(domain.clone());
+        }
+
+        headers.append(header::SET_COOKIE, cookie.to_string().parse().unwrap());
+    }
+
+    /// Append a "delete" Set-Cookie header (MaxAge = -1) directly to an
+    /// already-built response's `HeaderMap`.
+    fn append_delete_cookie(
+        headers: &mut actix_web::http::header::HeaderMap,
+        config: &CookieConfig,
+    ) {
+        let mut cookie = Cookie::build(config.name.clone(), "")
+            .path("/")
+            .max_age(actix_web::cookie::time::Duration::seconds(-1))
+            .secure(config.secure)
+            .http_only(config.http_only)
+            .same_site(config.same_site)
+            .finish();
+
+        if let Some(ref domain) = config.domain {
+            cookie.set_domain(domain.clone());
+        }
+
+        headers.append(header::SET_COOKIE, cookie.to_string().parse().unwrap());
     }
 
     /// Append a "delete" cookie (MaxAge = -1) to the response builder.
@@ -949,25 +952,25 @@ impl ActixJwtMiddleware {
         let token_pair = match self.token_generator(&data).await {
             Ok(t) => t,
             Err(_) => {
-                let msg =
-                    (self.http_status_message_func)(req, &JwtError::FailedTokenCreation);
+                let msg = (self.http_status_message_func)(req, &JwtError::FailedTokenCreation);
                 return self.unauthorized_response(req, 500, &msg);
             }
         };
 
-        let mut resp_builder = HttpResponse::Ok();
+        let mut resp = (self.login_response)(req, &token_pair);
 
         if self.send_cookie {
-            let acc_cfg = self.access_cookie_config();
-            Self::set_cookie(&mut resp_builder, &acc_cfg, &token_pair.access_token);
-
+            Self::append_cookie(
+                resp.headers_mut(),
+                &self.access_cookie_config(),
+                &token_pair.access_token,
+            );
             if let Some(ref rt) = token_pair.refresh_token {
-                let ref_cfg = self.refresh_cookie_config();
-                Self::set_cookie(&mut resp_builder, &ref_cfg, rt);
+                Self::append_cookie(resp.headers_mut(), &self.refresh_cookie_config(), rt);
             }
         }
 
-        (self.login_response)(req, &token_pair)
+        resp
     }
 
     /// Extract a refresh token from the request (cookie, form, or JSON body).
@@ -1035,17 +1038,14 @@ impl ActixJwtMiddleware {
             }
         }
 
-        let mut resp_builder = HttpResponse::Ok();
+        let mut resp = (self.logout_response)(req);
 
         if self.send_cookie {
-            let acc_cfg = self.access_cookie_config();
-            Self::delete_cookie(&mut resp_builder, &acc_cfg);
-
-            let ref_cfg = self.refresh_cookie_config();
-            Self::delete_cookie(&mut resp_builder, &ref_cfg);
+            Self::append_delete_cookie(resp.headers_mut(), &self.access_cookie_config());
+            Self::append_delete_cookie(resp.headers_mut(), &self.refresh_cookie_config());
         }
 
-        (self.logout_response)(req)
+        resp
     }
 
     /// Refresh handler. Validates old refresh token, generates new token pair,
@@ -1054,8 +1054,7 @@ impl ActixJwtMiddleware {
         let refresh_token = match self.extract_refresh_token(req, body) {
             Some(rt) => rt,
             None => {
-                let msg =
-                    (self.http_status_message_func)(req, &JwtError::MissingRefreshToken);
+                let msg = (self.http_status_message_func)(req, &JwtError::MissingRefreshToken);
                 return self.unauthorized_response(req, 400, &msg);
             }
         };
@@ -1079,19 +1078,20 @@ impl ActixJwtMiddleware {
             }
         };
 
-        let mut resp_builder = HttpResponse::Ok();
+        let mut resp = (self.refresh_response)(req, &token_pair);
 
         if self.send_cookie {
-            let acc_cfg = self.access_cookie_config();
-            Self::set_cookie(&mut resp_builder, &acc_cfg, &token_pair.access_token);
-
+            Self::append_cookie(
+                resp.headers_mut(),
+                &self.access_cookie_config(),
+                &token_pair.access_token,
+            );
             if let Some(ref rt) = token_pair.refresh_token {
-                let ref_cfg = self.refresh_cookie_config();
-                Self::set_cookie(&mut resp_builder, &ref_cfg, rt);
+                Self::append_cookie(resp.headers_mut(), &self.refresh_cookie_config(), rt);
             }
         }
 
-        (self.refresh_response)(req, &token_pair)
+        resp
     }
 
     /// Builds an [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749#section-5.1)
@@ -1099,9 +1099,15 @@ impl ActixJwtMiddleware {
     /// `expires_in` and (optionally) `refresh_token`.
     pub fn generate_token_response(token: &Token) -> serde_json::Map<String, Value> {
         let mut map = serde_json::Map::new();
-        map.insert("access_token".into(), Value::String(token.access_token.clone()));
+        map.insert(
+            "access_token".into(),
+            Value::String(token.access_token.clone()),
+        );
         map.insert("token_type".into(), Value::String(token.token_type.clone()));
-        map.insert("expires_in".into(), Value::Number(token.expires_in().into()));
+        map.insert(
+            "expires_in".into(),
+            Value::Number(token.expires_in().into()),
+        );
 
         if let Some(ref rt) = token.refresh_token {
             map.insert("refresh_token".into(), Value::String(rt.clone()));
@@ -1132,7 +1138,6 @@ impl Default for ActixJwtMiddleware {
         Self::new()
     }
 }
-
 
 /// Describes cookie parameters for either access or refresh tokens.
 ///
@@ -1191,15 +1196,13 @@ pub fn get_token(req: &HttpRequest) -> Option<String> {
 /// Returns `None` if the middleware has not processed the request yet or no
 /// identity was resolved.
 pub fn get_identity(req: &HttpRequest) -> Option<Value> {
-    req.extensions()
-        .get::<JwtIdentity>()
-        .map(|i| i.0.clone())
+    req.extensions().get::<JwtIdentity>().map(|i| i.0.clone())
 }
 
 /// [`Transform`] factory produced by
 /// [`ActixJwtMiddleware::middleware`].
 ///
-/// You do not need to construct this directly — use
+/// You do not need to construct this directly - use
 /// `jwt.middleware()` instead.
 pub struct JwtAuth {
     inner: Arc<ActixJwtMiddleware>,
@@ -1293,7 +1296,7 @@ where
                         .map_into_right_body());
                 }
 
-                // No ErrorHandler — default unauthorized
+                // No ErrorHandler - default unauthorized
                 let resp = mw.handle_middleware_error(req.request(), &err);
                 return Ok(req.into_response(resp).map_into_right_body());
             }
@@ -1319,14 +1322,11 @@ where
             let mut res = service.call(req).await?;
 
             if let Some(val) = send_auth {
-                res.headers_mut().insert(
-                    header::AUTHORIZATION,
-                    val.parse().unwrap(),
-                );
+                res.headers_mut()
+                    .insert(header::AUTHORIZATION, val.parse().unwrap());
             }
 
             Ok(res.map_into_left_body())
         })
     }
 }
-

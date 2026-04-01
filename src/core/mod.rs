@@ -7,9 +7,9 @@
 //!
 //! # Contents
 //!
-//! * [`TokenStore`] — async trait defining the refresh-token storage contract.
-//! * [`Token`] — a complete JWT token pair (access + optional refresh).
-//! * [`RefreshTokenData`] — data stored alongside each refresh token.
+//! * [`TokenStore`] - async trait defining the refresh-token storage contract.
+//! * [`Token`] - a complete JWT token pair (access + optional refresh).
+//! * [`RefreshTokenData`] - data stored alongside each refresh token.
 
 pub mod store;
 pub mod token;

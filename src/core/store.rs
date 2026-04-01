@@ -15,9 +15,9 @@ use crate::errors::JwtError;
 ///
 /// # Provided implementations
 ///
-/// * [`crate::store::InMemoryRefreshTokenStore`] — thread-safe `HashMap`
+/// * [`crate::store::InMemoryRefreshTokenStore`] - thread-safe `HashMap`
 ///   behind a [`tokio::sync::RwLock`].
-/// * `RedisRefreshTokenStore` — Redis-backed store
+/// * `RedisRefreshTokenStore` - Redis-backed store
 ///   (requires the `redis-store` feature).
 ///
 /// # Examples
