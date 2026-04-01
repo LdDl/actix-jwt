@@ -2,7 +2,7 @@
 name = "actix-jwt"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.93"
 description = "Full-featured JWT authentication middleware for actix-web: login, logout, refresh, token rotation, cookie management, RSA/HMAC, RBAC authorizer, pluggable token store"
 license = "MIT"
 repository = "https://github.com/LdDl/actix-jwt"
