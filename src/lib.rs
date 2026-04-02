@@ -1,7 +1,7 @@
 //! Full-featured JWT authentication middleware for [actix-web].
 //!
-//! This crate is a Rust port of the Go
-//! [`echo-jwt`](https://github.com/LdDl/echo-jwt) module (itself a port of
+//! This crate is a Rust port of
+//! [`echo-jwt`](https://github.com/LdDl/echo-jwt) (Go implementation, itself a port of
 //! [`gin-jwt`](https://github.com/appleboy/gin-jwt) to the Echo framework).
 //! It goes far beyond simple token validation - it provides login, logout and
 //! refresh handlers, refresh-token rotation with a pluggable store, cookie

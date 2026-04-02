@@ -1,7 +1,8 @@
 //! Store factory for creating token stores from configuration.
 //!
-//! Mirrors the Go
-//! [`store/factory.go`](https://github.com/LdDl/echo-jwt/blob/master/store/factory.go).
+//! Mirrors
+//! [`store/factory.go`](https://github.com/LdDl/echo-jwt/blob/master/store/factory.go)
+//! from the Go implementation.
 
 use crate::core::TokenStore;
 use crate::errors::JwtError;
@@ -131,9 +132,9 @@ pub fn new_memory_store() -> Box<dyn TokenStore> {
     Box::new(InMemoryRefreshTokenStore::new())
 }
 
-/// Same as [`new_memory_store`] but mirrors the Go
+/// Same as [`new_memory_store`] but mirrors
 /// [`MustNewMemoryStore`](https://github.com/LdDl/echo-jwt/blob/master/store/factory.go)
-/// which panics on error.  Since the in-memory store is infallible this
+/// from the Go implementation, which panics on error.  Since the in-memory store is infallible this
 /// function never panics, but the name is kept for API parity.
 ///
 /// # Examples

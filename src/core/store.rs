@@ -1,8 +1,9 @@
 //! Refresh-token storage trait.
 //!
-//! Mirrors the Go
+//! Mirrors the
 //! [`core.TokenStore`](https://github.com/LdDl/echo-jwt/blob/master/core/store.go)
-//! interface. Implementations live in the [`crate::store`] module.
+//! interface from the Go implementation. Implementations live in the
+//! [`crate::store`] module.
 
 use async_trait::async_trait;
 

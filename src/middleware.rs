@@ -1,7 +1,8 @@
 //! Central JWT authentication middleware for actix-web.
 //!
-//! This module is a Rust port of the Go
-//! [`EchoJWTMiddleware`](https://github.com/LdDl/echo-jwt/blob/master/auth_jwt.go).
+//! This module is a Rust port of
+//! [`EchoJWTMiddleware`](https://github.com/LdDl/echo-jwt/blob/master/auth_jwt.go)
+//! from the Go implementation.
 
 use std::collections::HashMap;
 use std::future::{Future, Ready, ready};
@@ -44,8 +45,9 @@ pub struct JwtIdentity(pub Value);
 
 /// Central JWT authentication middleware for actix-web.
 ///
-/// A full-featured port of the Go
-/// [`EchoJWTMiddleware`](https://github.com/LdDl/echo-jwt/blob/master/auth_jwt.go),
+/// A full-featured Rust port of
+/// [`EchoJWTMiddleware`](https://github.com/LdDl/echo-jwt/blob/master/auth_jwt.go)
+/// from the Go implementation,
 /// providing:
 ///
 /// * Login / logout / refresh handlers with token rotation.
@@ -223,9 +225,9 @@ pub struct ActixJwtMiddleware {
 impl ActixJwtMiddleware {
     /// Creates a new middleware instance with sensible defaults.
     ///
-    /// Mirrors the Go
+    /// Mirrors
     /// [`MiddlewareInit`](https://github.com/LdDl/echo-jwt/blob/master/auth_jwt.go)
-    /// defaults.  You **must** call [`init`](Self::init) after configuring
+    /// defaults from the Go implementation.  You **must** call [`init`](Self::init) after configuring
     /// the instance.
     pub fn new() -> Self {
         Self {
@@ -307,8 +309,9 @@ impl ActixJwtMiddleware {
 
     /// Validates configuration and prepares signing / decoding keys.
     ///
-    /// **Must be called before the middleware is used.** Mirrors the Go
-    /// [`MiddlewareInit`](https://github.com/LdDl/echo-jwt/blob/master/auth_jwt.go).
+    /// **Must be called before the middleware is used.** Mirrors
+    /// [`MiddlewareInit`](https://github.com/LdDl/echo-jwt/blob/master/auth_jwt.go)
+    /// from the Go implementation.
     ///
     /// # Errors
     ///
@@ -551,7 +554,8 @@ impl ActixJwtMiddleware {
     }
 
     /// Generate a complete token pair (access + refresh) and store the refresh
-    /// token. Mirrors Go's `TokenGenerator`.
+    /// token. Mirrors [`TokenGenerator`](https://github.com/LdDl/echo-jwt/blob/master/auth_jwt.go)
+    /// from the Go implementation.
     pub async fn token_generator(&self, data: &Value) -> Result<Token, JwtError> {
         let (access_token, expire) = self.generate_access_token(data)?;
         let refresh_token = self.generate_refresh_token()?;

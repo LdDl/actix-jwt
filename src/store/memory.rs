@@ -1,7 +1,8 @@
 //! Thread-safe, in-memory refresh-token store.
 //!
-//! Mirrors the Go
-//! [`store/memory.go`](https://github.com/LdDl/echo-jwt/blob/master/store/memory.go).
+//! Mirrors
+//! [`store/memory.go`](https://github.com/LdDl/echo-jwt/blob/master/store/memory.go)
+//! from the Go implementation.
 
 use std::collections::HashMap;
 

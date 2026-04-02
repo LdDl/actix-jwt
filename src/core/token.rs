@@ -1,7 +1,8 @@
 //! Token data structures.
 //!
-//! Mirrors the Go
-//! [`core/token.go`](https://github.com/LdDl/echo-jwt/blob/master/core/token.go).
+//! Mirrors
+//! [`core/token.go`](https://github.com/LdDl/echo-jwt/blob/master/core/token.go)
+//! from the Go implementation.
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

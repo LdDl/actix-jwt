@@ -1,7 +1,8 @@
 //! Redis-backed refresh-token store.
 //!
-//! Mirrors the Go
-//! [`store/redis.go`](https://github.com/LdDl/echo-jwt/blob/master/store/redis.go).
+//! Mirrors
+//! [`store/redis.go`](https://github.com/LdDl/echo-jwt/blob/master/store/redis.go)
+//! from the Go implementation.
 //!
 //! Requires the **`redis-store`** Cargo feature.
 

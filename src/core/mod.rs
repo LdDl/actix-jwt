@@ -1,7 +1,7 @@
 //! Framework-independent core types shared by all store backends.
 //!
-//! This module mirrors the Go
-//! [`core/`](https://github.com/LdDl/echo-jwt/tree/master/core) package and
+//! This module mirrors the
+//! [`core/`](https://github.com/LdDl/echo-jwt/tree/master/core) package from the Go implementation and
 //! contains no actix-web dependency, making it reusable with any Rust web
 //! framework.
 //!

@@ -56,7 +56,7 @@ async fn create_test_app(
             .route("/login", web::post().to(login_handler))
             .route("/refresh", web::post().to(refresh_handler))
             .route("/logout", web::post().to(logout_handler))
-            // Matches Go echoHandler: /auth/refresh_token is registered BEFORE
+            // Matches the Go implementation's echoHandler: /auth/refresh_token is registered BEFORE
             // middleware, so it does NOT require auth.
             .route("/auth/refresh_token", web::post().to(refresh_handler))
             .service(
@@ -341,7 +341,7 @@ async fn test_login() {
     );
 }
 
-// 12. TestLoginWrongCredentials (part of Go's TestLoginHandler)
+// 12. TestLoginWrongCredentials (part of TestLoginHandler from the Go implementation)
 #[actix_web::test]
 async fn test_login_wrong_credentials() {
     let jwt = create_test_middleware();
@@ -2902,7 +2902,7 @@ async fn test_skipper_with_login() {
 }
 
 // 66. TestEchoJWTMiddleware_FunctionalOptionsOnly (RedisConfig construction)
-// In Go this tests EnableRedisStore() with functional options.
+// In the Go implementation this tests EnableRedisStore() with functional options.
 // In Rust, RedisConfig is a plain struct - test construction with various fields.
 #[cfg(feature = "redis-store")]
 #[actix_web::test]
@@ -2968,7 +2968,7 @@ async fn test_redis_config_construction() {
     assert_eq!(config.key_prefix, "custom-prefix:");
     assert!(config.tls);
 
-    // Override - second config replaces first (no mutation like Go)
+    // Override - second config replaces first (no mutation like in the Go implementation)
     let _first = RedisConfig {
         addr: "redis://first.redis.com:6379/".to_string(),
         password: Some("first-pass".to_string()),

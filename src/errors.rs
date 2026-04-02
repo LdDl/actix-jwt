@@ -2,9 +2,9 @@
 //!
 //! All errors are represented by the [`JwtError`] enum which implements
 //! [`std::error::Error`], [`std::fmt::Display`] and
-//! [`actix_web::ResponseError`].  Error messages match the Go
-//! [`echo-jwt`](https://github.com/LdDl/echo-jwt) sentinel errors for
-//! API-level compatibility.
+//! [`actix_web::ResponseError`].  Error messages match the
+//! [`echo-jwt`](https://github.com/LdDl/echo-jwt) (Go implementation) sentinel
+//! errors for API-level compatibility.
 
 use std::fmt;
 

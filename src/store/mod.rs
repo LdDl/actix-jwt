@@ -1,7 +1,8 @@
 //! Refresh-token storage backends and factory utilities.
 //!
-//! Mirrors the Go
-//! [`store/`](https://github.com/LdDl/echo-jwt/tree/master/store) package.
+//! Mirrors the
+//! [`store/`](https://github.com/LdDl/echo-jwt/tree/master/store) package
+//! from the Go implementation.
 //!
 //! # Available backends
 //!

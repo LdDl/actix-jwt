@@ -6,9 +6,10 @@
 // For production, configure proper certificates.
 // This example shows the configuration pattern.
 //
-// TLS Configuration Notes (Go parity):
+// TLS Configuration Notes (parity with the Go implementation):
 //
-// In Go, TLS is configured via `createTLSConfig()` which returns `*tls.Config`:
+// In the Go version (https://github.com/LdDl/echo-jwt/blob/master/examples/redis_tls/main.go),
+// TLS is configured via `createTLSConfig()` which returns `*tls.Config`:
 //   - Basic TLS: system CA certificates with TLS 1.2+ minimum
 //   - Custom CA: `loadCACertificate(caPath)` reads PEM-encoded CA cert
 //   - Mutual TLS: `loadClientCertificate(certPath, keyPath)` for client auth
