@@ -78,10 +78,7 @@ async fn main() -> std::io::Result<()> {
     });
 
     jwt.authorizer = Arc::new(|req: &HttpRequest, data: &Value| {
-        let role = data
-            .get("role")
-            .and_then(|v| v.as_str())
-            .unwrap_or("");
+        let role = data.get("role").and_then(|v| v.as_str()).unwrap_or("");
         let path = req.path();
 
         // Admin has access to everything

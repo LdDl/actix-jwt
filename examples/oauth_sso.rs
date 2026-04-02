@@ -120,10 +120,7 @@ async fn main() -> std::io::Result<()> {
 /// curl -X POST http://localhost:8000/oauth/callback \
 ///   -H 'Content-Type: application/json' \
 ///   -d '{"id":"google_123","email":"user@example.com","name":"Test User","provider":"google"}'
-async fn oauth_callback(
-    jwt: web::Data<Arc<ActixJwtMiddleware>>,
-    body: web::Bytes,
-) -> HttpResponse {
+async fn oauth_callback(jwt: web::Data<Arc<ActixJwtMiddleware>>, body: web::Bytes) -> HttpResponse {
     let user_data: Value = match serde_json::from_slice(&body) {
         Ok(v) => v,
         Err(_) => {
