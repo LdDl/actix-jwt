@@ -18,18 +18,21 @@ fn create_test_middleware() -> Arc<ActixJwtMiddleware> {
     mw.timeout = Duration::from_secs(3600);
     mw.max_refresh = Duration::from_secs(3600);
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin", "role": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin", "role": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -410,18 +413,21 @@ async fn test_rsa() {
     mw.pub_key_file = Some("testdata/jwtRS256.key.pub".to_string());
     mw.timeout = Duration::from_secs(3600);
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -491,18 +497,21 @@ async fn test_parse_token_key_func() {
     mw.timeout = Duration::from_secs(3600);
     mw.max_refresh = Duration::from_secs(86400);
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -605,18 +614,21 @@ async fn test_protected_route_expired_token() {
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(1);
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -673,18 +685,21 @@ async fn test_expired_token_on_auth_with_send_authorization() {
     mw.max_refresh = Duration::from_secs(86400);
     mw.send_authorization = true;
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -768,18 +783,21 @@ async fn test_refresh_handler_rs256() {
     mw.send_cookie = true;
     mw.cookie_name = "jwt".to_string();
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -867,18 +885,21 @@ async fn test_valid_refresh_token() {
     mw.max_refresh = Duration::from_secs(7200);
     mw.refresh_token_timeout = Duration::from_secs(86400);
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -927,18 +948,21 @@ async fn test_expired_token_on_refresh_handler() {
     mw.timeout = Duration::from_secs(3600);
     mw.refresh_token_timeout = Duration::from_millis(1);
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -1023,18 +1047,21 @@ async fn test_logout_with_cookies() {
     mw.cookie_name = "jwt".to_string();
     mw.cookie_domain = Some("example.com".to_string());
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -1075,20 +1102,23 @@ async fn test_authorizer() {
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "user" && login.password == "user" {
-            Ok(serde_json::json!({"username": "user", "role": "viewer"}))
-        } else if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin", "role": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "user" && login.password == "user" {
+                Ok(serde_json::json!({"username": "user", "role": "viewer"}))
+            } else if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin", "role": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -1179,18 +1209,21 @@ async fn test_claims_during_authorization() {
     mw.timeout = Duration::from_secs(3600);
     mw.max_refresh = Duration::from_secs(86400);
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -1268,18 +1301,21 @@ async fn test_token_expire() {
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -1315,18 +1351,21 @@ async fn test_token_lookup_query() {
     mw.timeout = Duration::from_secs(3600);
     mw.token_lookup = "query:token".to_string();
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -1385,18 +1424,21 @@ async fn test_token_from_param_path() {
     mw.timeout = Duration::from_secs(3600);
     mw.token_lookup = "param:token".to_string();
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -1447,18 +1489,21 @@ async fn test_token_lookup_cookie() {
     mw.timeout = Duration::from_secs(3600);
     mw.token_lookup = "cookie:jwt".to_string();
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -1523,18 +1568,21 @@ async fn test_define_token_head_name() {
     mw.timeout = Duration::from_secs(3600);
     mw.token_head_name = "JWTTOKEN       ".to_string();
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -1585,7 +1633,7 @@ async fn test_http_status_message_func_via_http() {
     mw.realm = "test zone".to_string();
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
-    mw.authenticator = Some(Arc::new(|_req, _body| Err(JwtError::FailedAuthentication)));
+    mw.authenticator = Some(Arc::new(|_req, _body| Box::pin(async { Err(JwtError::FailedAuthentication) })));
     mw.http_status_message_func = Arc::new(|_req, err| {
         if matches!(err, JwtError::FailedAuthentication) {
             "Custom error message".to_string()
@@ -1625,18 +1673,21 @@ async fn test_send_authorization_bool() {
     mw.max_refresh = Duration::from_secs(86400);
     mw.send_authorization = true;
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -1691,18 +1742,21 @@ async fn test_check_token_string() {
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -1759,7 +1813,7 @@ async fn test_token_generator() {
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
     mw.max_refresh = Duration::from_secs(86400);
-    mw.authenticator = Some(Arc::new(|_req, _body| Ok(serde_json::json!("admin"))));
+    mw.authenticator = Some(Arc::new(|_req, _body| Box::pin(async { Ok(serde_json::json!("admin")) })));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
         claims.insert("identity".to_string(), data.clone());
@@ -1876,18 +1930,21 @@ async fn test_skipper() {
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.skipper = Some(Arc::new(|req| req.path() == "/auth/public"));
     mw.init().unwrap();
@@ -1935,7 +1992,7 @@ async fn test_before_func() {
     mw.realm = "test zone".to_string();
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
-    mw.authenticator = Some(Arc::new(|_req, _body| Err(JwtError::FailedAuthentication)));
+    mw.authenticator = Some(Arc::new(|_req, _body| Box::pin(async { Err(JwtError::FailedAuthentication) })));
     mw.before_func = Some(Arc::new(move |_req| {
         before_called_clone.store(true, Ordering::SeqCst);
     }));
@@ -1970,18 +2027,21 @@ async fn test_success_handler() {
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -2035,7 +2095,7 @@ async fn test_error_handler() {
     mw.realm = "test zone".to_string();
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
-    mw.authenticator = Some(Arc::new(|_req, _body| Err(JwtError::FailedAuthentication)));
+    mw.authenticator = Some(Arc::new(|_req, _body| Box::pin(async { Err(JwtError::FailedAuthentication) })));
     mw.error_handler = Some(Arc::new(move |_req, _err| {
         error_called_clone.store(true, Ordering::SeqCst);
         Some(JwtError::Forbidden)
@@ -2072,7 +2132,7 @@ async fn test_continue_on_ignored_error() {
     mw.realm = "test zone".to_string();
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
-    mw.authenticator = Some(Arc::new(|_req, _body| Err(JwtError::FailedAuthentication)));
+    mw.authenticator = Some(Arc::new(|_req, _body| Box::pin(async { Err(JwtError::FailedAuthentication) })));
     mw.continue_on_ignored_error = true;
     mw.error_handler = Some(Arc::new(|_req, _err| None));
     mw.init().unwrap();
@@ -2148,18 +2208,21 @@ async fn test_www_authenticate_header() {
         mw.timeout = Duration::from_secs(3600);
         mw.max_refresh = Duration::from_secs(86400);
         mw.authenticator = Some(Arc::new(|_req, body| {
-            #[derive(serde::Deserialize)]
-            struct Login {
-                username: String,
-                password: String,
-            }
-            let login: Login =
-                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-            if login.username == "admin" && login.password == "admin" {
-                Ok(serde_json::json!({"username": "admin"}))
-            } else {
-                Err(JwtError::FailedAuthentication)
-            }
+            let result = (|| -> Result<serde_json::Value, JwtError> {
+                #[derive(serde::Deserialize)]
+                struct Login {
+                    username: String,
+                    password: String,
+                }
+                let login: Login =
+                    serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+                if login.username == "admin" && login.password == "admin" {
+                    Ok(serde_json::json!({"username": "admin"}))
+                } else {
+                    Err(JwtError::FailedAuthentication)
+                }
+            })();
+            Box::pin(async move { result })
         }));
         mw.init().unwrap();
         let jwt = Arc::new(mw);
@@ -2199,18 +2262,21 @@ async fn test_www_authenticate_header_on_refresh() {
     mw.timeout = Duration::from_secs(3600);
     mw.max_refresh = Duration::from_secs(86400);
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -2298,18 +2364,21 @@ async fn test_www_authenticate_header_with_different_realms() {
         mw.timeout = Duration::from_secs(3600);
         mw.max_refresh = Duration::from_secs(86400);
         mw.authenticator = Some(Arc::new(|_req, body| {
-            #[derive(serde::Deserialize)]
-            struct Login {
-                username: String,
-                password: String,
-            }
-            let login: Login =
-                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-            if login.username == "admin" && login.password == "admin" {
-                Ok(serde_json::json!({"username": "admin"}))
-            } else {
-                Err(JwtError::FailedAuthentication)
-            }
+            let result = (|| -> Result<serde_json::Value, JwtError> {
+                #[derive(serde::Deserialize)]
+                struct Login {
+                    username: String,
+                    password: String,
+                }
+                let login: Login =
+                    serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+                if login.username == "admin" && login.password == "admin" {
+                    Ok(serde_json::json!({"username": "admin"}))
+                } else {
+                    Err(JwtError::FailedAuthentication)
+                }
+            })();
+            Box::pin(async move { result })
         }));
         mw.init().unwrap();
         let jwt = Arc::new(mw);
@@ -2351,7 +2420,7 @@ async fn test_standard_jwt_claims_in_payload_func() {
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
     mw.max_refresh = Duration::from_secs(86400);
-    mw.authenticator = Some(Arc::new(|_req, _body| Ok(serde_json::json!("user123"))));
+    mw.authenticator = Some(Arc::new(|_req, _body| Box::pin(async { Ok(serde_json::json!("user123")) })));
     mw.payload_func = Some(Arc::new(|data| {
         let user_id = data.as_str().unwrap_or("unknown");
         let mut claims = HashMap::new();
@@ -2401,7 +2470,7 @@ async fn test_framework_claims_cannot_be_overwritten() {
     let fixed_time = chrono::Utc::now();
     let fixed_time_clone = fixed_time;
     mw.time_func = Arc::new(move || fixed_time_clone);
-    mw.authenticator = Some(Arc::new(|_req, _body| Ok(serde_json::json!("user123"))));
+    mw.authenticator = Some(Arc::new(|_req, _body| Box::pin(async { Ok(serde_json::json!("user123")) })));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
         // Try to override framework claims
@@ -2459,7 +2528,7 @@ async fn test_all_standard_claims_can_be_set() {
         mw.realm = "test zone".to_string();
         mw.key = b"secret key salt".to_vec();
         mw.timeout = Duration::from_secs(3600);
-        mw.authenticator = Some(Arc::new(|_req, _body| Ok(serde_json::json!("user"))));
+        mw.authenticator = Some(Arc::new(|_req, _body| Box::pin(async { Ok(serde_json::json!("user")) })));
         mw.payload_func = Some(Arc::new(move |data| {
             let mut claims = HashMap::new();
             claims.insert(claim_key_owned.clone(), claim_value_clone.clone());
@@ -2490,14 +2559,17 @@ async fn test_sub_claim_as_user_identifier() {
     mw.timeout = Duration::from_secs(3600);
     mw.identity_key = "sub".to_string();
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        Ok(serde_json::json!({"username": login.username}))
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            Ok(serde_json::json!({"username": login.username}))
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let user_id = data
@@ -2611,18 +2683,21 @@ async fn test_login_handler_with_cookie() {
     mw.cookie_name = "jwt".to_string();
     mw.cookie_domain = Some("example.com".to_string());
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -2676,7 +2751,7 @@ async fn test_before_func_not_called_when_skipped() {
     mw.realm = "test zone".to_string();
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
-    mw.authenticator = Some(Arc::new(|_req, _body| Err(JwtError::FailedAuthentication)));
+    mw.authenticator = Some(Arc::new(|_req, _body| Box::pin(async { Err(JwtError::FailedAuthentication) })));
     mw.skipper = Some(Arc::new(|_req| true)); // skip everything
     mw.before_func = Some(Arc::new(move |_req| {
         before_called_clone.store(true, Ordering::SeqCst);
@@ -2709,18 +2784,21 @@ async fn test_success_handler_error() {
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();
@@ -2770,7 +2848,7 @@ async fn test_error_handler_with_invalid_token() {
     mw.realm = "test zone".to_string();
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
-    mw.authenticator = Some(Arc::new(|_req, _body| Err(JwtError::FailedAuthentication)));
+    mw.authenticator = Some(Arc::new(|_req, _body| Box::pin(async { Err(JwtError::FailedAuthentication) })));
     mw.error_handler = Some(Arc::new(move |_req, err| {
         if err.is_token_parsing() {
             received_parsing_clone.store(true, Ordering::SeqCst);
@@ -2808,7 +2886,7 @@ async fn test_continue_on_ignored_error_false() {
     mw.realm = "test zone".to_string();
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
-    mw.authenticator = Some(Arc::new(|_req, _body| Err(JwtError::FailedAuthentication)));
+    mw.authenticator = Some(Arc::new(|_req, _body| Box::pin(async { Err(JwtError::FailedAuthentication) })));
     mw.continue_on_ignored_error = false;
     mw.error_handler = Some(Arc::new(|_req, _err| None));
     mw.init().unwrap();
@@ -2842,18 +2920,21 @@ async fn test_skipper_with_login() {
     mw.key = b"secret key salt".to_vec();
     mw.timeout = Duration::from_secs(3600);
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin"}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin"}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();

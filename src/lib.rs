@@ -28,13 +28,16 @@
 //!     jwt.authenticator = Some(Arc::new(|_req, body| {
 //!         #[derive(serde::Deserialize)]
 //!         struct Login { username: String, password: String }
-//!         let creds: Login = serde_json::from_slice(body)
-//!             .map_err(|_| actix_jwt::JwtError::MissingLoginValues)?;
-//!         if creds.username == "admin" && creds.password == "admin" {
-//!             Ok(serde_json::json!({"username": creds.username}))
-//!         } else {
-//!             Err(actix_jwt::JwtError::FailedAuthentication)
-//!         }
+//!         let result = (|| {
+//!             let creds: Login = serde_json::from_slice(body)
+//!                 .map_err(|_| actix_jwt::JwtError::MissingLoginValues)?;
+//!             if creds.username == "admin" && creds.password == "admin" {
+//!                 Ok(serde_json::json!({"username": creds.username}))
+//!             } else {
+//!                 Err(actix_jwt::JwtError::FailedAuthentication)
+//!             }
+//!         })();
+//!         Box::pin(async move { result })
 //!     }));
 //!     jwt.init().expect("JWT middleware init");
 //!

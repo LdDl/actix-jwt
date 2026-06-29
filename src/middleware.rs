@@ -80,9 +80,10 @@ pub struct JwtIdentity(pub Value);
 ///     jwt.authenticator = Some(Arc::new(|_req, body| {
 ///         #[derive(serde::Deserialize)]
 ///         struct L { username: String, password: String }
-///         let creds: L = serde_json::from_slice(body)
-///             .map_err(|_| JwtError::MissingLoginValues)?;
-///         Ok(serde_json::json!({"user": creds.username}))
+///         let result = serde_json::from_slice::<L>(body)
+///             .map(|c| serde_json::json!({"user": c.username}))
+///             .map_err(|_| JwtError::MissingLoginValues);
+///         Box::pin(async move { result })
 ///     }));
 ///     jwt.init().unwrap();
 ///
@@ -137,8 +138,22 @@ pub struct ActixJwtMiddleware {
     pub time_func: Arc<dyn Fn() -> DateTime<Utc> + Send + Sync>,
 
     /// Validates login credentials and returns user data on success.
-    pub authenticator:
-        Option<Arc<dyn Fn(&HttpRequest, &[u8]) -> Result<Value, JwtError> + Send + Sync>>,
+    ///
+    /// The callback receives the request and raw body bytes, and returns a
+    /// future that resolves to the authenticated user data (or an error).
+    /// Extract what you need from the arguments synchronously, then return
+    /// an async block that owns all captured data.
+    pub authenticator: Option<
+        Arc<
+            dyn Fn(
+                    &HttpRequest,
+                    &[u8],
+                )
+                    -> Pin<Box<dyn Future<Output = Result<Value, JwtError>> + Send>>
+                + Send
+                + Sync,
+        >,
+    >,
     /// Decides whether the authenticated identity is allowed to proceed.
     pub authorizer: Arc<dyn Fn(&HttpRequest, &Value) -> bool + Send + Sync>,
     /// Maps user data to custom JWT claims.
@@ -945,7 +960,7 @@ impl ActixJwtMiddleware {
             }
         };
 
-        let data = match authenticator(req, body) {
+        let data = match authenticator(req, body).await {
             Ok(d) => d,
             Err(e) => {
                 let msg = (self.http_status_message_func)(req, &e);

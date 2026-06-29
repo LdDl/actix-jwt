@@ -31,18 +31,21 @@ fn create_redis_mw(store: Arc<dyn TokenStore>) -> ActixJwtMiddleware {
     mw.identity_key = "id".to_string();
     mw.refresh_token_store = store;
     mw.authenticator = Some(Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!({"username": "admin", "userid": 1}))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!({"username": "admin", "userid": 1}))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
     mw.payload_func = Some(Arc::new(|data| {
         let mut claims = HashMap::new();

@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::pin::Pin;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -10,21 +11,30 @@ use serde_json::Value;
 
 use actix_jwt::{ActixJwtMiddleware, JwtError, extract_claims, get_token};
 
-fn cookie_authenticator()
--> Arc<dyn Fn(&HttpRequest, &[u8]) -> Result<Value, JwtError> + Send + Sync> {
+fn cookie_authenticator() -> Arc<
+    dyn Fn(
+            &HttpRequest,
+            &[u8],
+        ) -> Pin<Box<dyn std::future::Future<Output = Result<Value, JwtError>> + Send>>
+        + Send
+        + Sync,
+> {
     Arc::new(|_req, body| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-        if login.username == "admin" && login.password == "admin" {
-            Ok(serde_json::json!(login.username))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+        let result = (|| -> Result<serde_json::Value, JwtError> {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
+            }
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+            if login.username == "admin" && login.password == "admin" {
+                Ok(serde_json::json!(login.username))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     })
 }
 
