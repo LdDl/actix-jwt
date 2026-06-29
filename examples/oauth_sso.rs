@@ -49,9 +49,8 @@ async fn main() -> std::io::Result<()> {
     jwt.send_authorization = true;
 
     jwt.authenticator = Some(Arc::new(
-        |_req: &HttpRequest, _body: &[u8]| -> Result<Value, JwtError> {
-            // Not used for OAuth flow - authentication happens in callback handlers
-            Err(JwtError::MissingLoginValues)
+        |_req: &HttpRequest, _body: &[u8]| {
+            Box::pin(async { Err(JwtError::MissingLoginValues) })
         },
     ));
 

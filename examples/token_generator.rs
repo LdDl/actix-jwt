@@ -20,8 +20,8 @@ async fn main() {
     jwt.refresh_token_timeout = Duration::from_secs(86400);
 
     jwt.authenticator = Some(Arc::new(
-        |_req: &actix_web::HttpRequest, _body: &[u8]| -> Result<Value, JwtError> {
-            Err(JwtError::MissingLoginValues)
+        |_req: &actix_web::HttpRequest, _body: &[u8]| {
+            Box::pin(async { Err(JwtError::MissingLoginValues) })
         },
     ));
     jwt.payload_func = Some(Arc::new(|data: &Value| {

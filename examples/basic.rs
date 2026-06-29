@@ -34,20 +34,23 @@ async fn main() -> std::io::Result<()> {
 
     // Authenticator: validate username/password, return user data as JSON Value
     jwt.authenticator = Some(Arc::new(|_req: &HttpRequest, body: &[u8]| {
-        let login: LoginRequest =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+        let result = (|| {
+            let login: LoginRequest =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
 
-        if (login.username == USER_ADMIN && login.password == USER_ADMIN)
-            || (login.username == "test" && login.password == "test")
-        {
-            Ok(json!({
-                "user_name": login.username,
-                "first_name": "Wu",
-                "last_name": "Bo-Yi",
-            }))
-        } else {
-            Err(JwtError::FailedAuthentication)
-        }
+            if (login.username == USER_ADMIN && login.password == USER_ADMIN)
+                || (login.username == "test" && login.password == "test")
+            {
+                Ok(json!({
+                    "user_name": login.username,
+                    "first_name": "Wu",
+                    "last_name": "Bo-Yi",
+                }))
+            } else {
+                Err(JwtError::FailedAuthentication)
+            }
+        })();
+        Box::pin(async move { result })
     }));
 
     // PayloadFunc: extract identity claims from user data returned by authenticator

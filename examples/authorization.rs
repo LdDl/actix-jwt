@@ -36,26 +36,29 @@ async fn main() -> std::io::Result<()> {
     jwt.token_head_name = "Bearer".to_string();
 
     jwt.authenticator = Some(Arc::new(|_req: &HttpRequest, body: &[u8]| {
-        #[derive(serde::Deserialize)]
-        struct Login {
-            username: String,
-            password: String,
-        }
-        let login: Login =
-            serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
-
-        let users: HashMap<&str, (&str, &str)> = HashMap::from([
-            ("admin", ("admin", "admin")),
-            ("user", ("user", "user")),
-            ("guest", ("guest", "guest")),
-        ]);
-
-        if let Some((pass, role)) = users.get(login.username.as_str()) {
-            if login.password == *pass {
-                return Ok(json!({"user_name": login.username, "role": role}));
+        let result = (|| {
+            #[derive(serde::Deserialize)]
+            struct Login {
+                username: String,
+                password: String,
             }
-        }
-        Err(JwtError::FailedAuthentication)
+            let login: Login =
+                serde_json::from_slice(body).map_err(|_| JwtError::MissingLoginValues)?;
+
+            let users: HashMap<&str, (&str, &str)> = HashMap::from([
+                ("admin", ("admin", "admin")),
+                ("user", ("user", "user")),
+                ("guest", ("guest", "guest")),
+            ]);
+
+            if let Some((pass, role)) = users.get(login.username.as_str()) {
+                if login.password == *pass {
+                    return Ok(json!({"user_name": login.username, "role": role}));
+                }
+            }
+            Err(JwtError::FailedAuthentication)
+        })();
+        Box::pin(async move { result })
     }));
 
     jwt.payload_func = Some(Arc::new(|data: &Value| {
